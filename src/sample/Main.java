@@ -27,6 +27,7 @@ import javafx.scene.control.Button;
 import javafx.geometry.Insets;
 import javafx.scene.control.Label;
 import javafx.util.Duration;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Timer;
@@ -37,33 +38,12 @@ public class Main extends Application {
     private boolean turnX = true;
     private Tile[][] board = new Tile[3][3];
     private List<Combo> combos = new ArrayList<>();
+    private Line line = new Line();
+
     Pane root = new Pane();
     StackPane currentplayerpane = new StackPane();
     private StringProperty test;
     Functions functions = new Functions();
-
-
-//    private Parent createContent() {
-////        Pane root = new Pane();
-//////        root.setPrefSize(600, 600);
-////
-////        for (int i = 0; i < 3; i++) {
-////            for (int j = 0; j < 3; j++) {
-////                Tile tile = new Tile();
-////                tile.setTranslateX(j * 200);
-////                tile.setTranslateY(i * 200);
-////                root.getChildren().add(tile);
-////                board[i][j] = tile;
-////            }
-////        }
-////
-////        return root;
-////    }
-//
-//    private Parent homescreen() {
-//
-//        return stackPane;
-//    }
 
 
     public static void main(String[] args) {
@@ -97,31 +77,21 @@ public class Main extends Application {
         titletext.setText("Tic-Tac-Toe Quiz Game");
         titletext.setTextAlignment(TextAlignment.CENTER);
         titletext.setFont(Font.font(null, FontWeight.BOLD, 80));
-        InnerShadow is = new InnerShadow();
-        is.setOffsetX(4.0f);
-        is.setOffsetY(4.0f);
-        titletext.setEffect(is);
         titletext.setFill(Color.DARKBLUE);
+        functions.setshadowstyling(titletext);
 
         //the variable titletext holds the title titletext
 
         Image tictactoeimage = new Image("tic tac toe.png");
         ImageView tictactoeimageview = new ImageView(tictactoeimage);
-        functions.
-        tictactoeimageview.setX(400);
-        tictactoeimageview.setY(400);
-        tictactoeimageview.setFitHeight(250);
-        tictactoeimageview.setFitWidth(250);
+        functions.setimageviewsizing(tictactoeimageview, 400, 400, 250, 250);
 
         //an image is created which is a plain image of a tic-tac-toe board to act as an icon
         //for the application and also an image in one corner of the login page
 
-        Image image = new Image("ronnie.png");
-        ImageView imageView = new ImageView(image);
-        imageView.setX(400);
-        imageView.setY(400);
-        imageView.setFitHeight(250);
-        imageView.setFitWidth(250);
+        Image rjimage = new Image("ronnie.png");
+        ImageView rjimageview = new ImageView(rjimage);
+        functions.setimageviewsizing(rjimageview, 400, 400, 250, 250);
 
         //ronnie.png is an image with my initials which is displayed in the login page as a form of trademarking
 
@@ -151,12 +121,6 @@ public class Main extends Application {
         loginPane.add(player2username, 1, 4);
         //the textfield player1 username allows one user to enter his name and therefore stores the data in this field
 
-//        Label lblPassword2 = new Label("Password:");
-//        loginPane.add(lblPassword2, 0, 5);
-//
-//        PasswordField pwBox2 = new PasswordField();
-//        pwBox2.setPromptText("Password");
-//        loginPane.add(pwBox2, 1, 5);
 
         Button loginbutton = new Button("Login");
         loginPane.add(loginbutton, 1, 7);
@@ -192,10 +156,10 @@ public class Main extends Application {
         StackPane.setAlignment(tictactoeimageview, Pos.TOP_LEFT);
         StackPane.setAlignment(titletext, Pos.TOP_CENTER);
         StackPane.setAlignment(loginPane, Pos.CENTER);
-        StackPane.setAlignment(imageView, Pos.TOP_RIGHT);
+        StackPane.setAlignment(rjimageview, Pos.TOP_RIGHT);
         //stackpane allows me to position the title, loginpane and the two images.
 
-        stackPane.getChildren().addAll(loginPane, titletext, imageView, tictactoeimageview);
+        stackPane.getChildren().addAll(loginPane, titletext, rjimageview, tictactoeimageview);
         //adds the children to the stackpane once alligned
 
 
@@ -209,7 +173,6 @@ public class Main extends Application {
             }
         }
         //this nested for loop creates the tiles in a 3x3 format
-
 
 
         //horizontal
@@ -245,6 +208,18 @@ public class Main extends Application {
         }
     }
 
+    public void resetBoard() {
+        for (int i = 0; i < 3; i++) {
+            for (int j = 0; j < 3; j++) {
+                board[i][j].text.setText(null);
+            }
+        }
+
+        playable = true;
+        turnX = true;
+        root.getChildren().remove(line);
+    }
+
     public Boolean getplayerxturn() {
         return turnX;
     }
@@ -269,7 +244,7 @@ public class Main extends Application {
         root.getChildren().add(line);
 
         Timeline timeline = new Timeline();
-        timeline.getKeyFrames().add(new KeyFrame(Duration.seconds(2),
+        timeline.getKeyFrames().add(new KeyFrame(Duration.seconds(3),
                 new KeyValue(line.endXProperty(), combo.tiles[2].getCenterX()),
                 new KeyValue(line.endYProperty(), combo.tiles[2].getCenterY())));
         timeline.play();
@@ -282,9 +257,9 @@ public class Main extends Application {
     }
 
 
-
     private class Combo {
         private Tile[] tiles;
+
         public Combo(Tile... tiles) {
             this.tiles = tiles;
         }
@@ -303,6 +278,7 @@ public class Main extends Application {
         private Text text = new Text();
         private Text currentplayer = new Text();
         private InnerShadow is = new InnerShadow();
+        Functions functions = new Functions();
 
         public Tile() {
             Rectangle border = new Rectangle(200, 200);
@@ -321,13 +297,13 @@ public class Main extends Application {
                 if (!playable)
                     return;
                 if (event.getButton() == MouseButton.PRIMARY) {
-                    if (!turnX) {
-                        return;
+                    if (turnX) {
+                        drawX();
+                        turnX = false;
+                    } else {
+                        drawO();
+                        turnX = true;
                     }
-                    root.getChildren().removeAll(currentplayer);
-                    drawX();
-                    setPlayer(false);
-                    turnX = false;
                     checkState();
 
                 } else if (event.getButton() == MouseButton.SECONDARY) {
@@ -343,7 +319,6 @@ public class Main extends Application {
             });
 
         }
-
 
 
         public double getCenterX() {
@@ -362,10 +337,8 @@ public class Main extends Application {
         private void drawX() {
             InnerShadow is = new InnerShadow();
             text.setFont(Font.font(null, FontWeight.BOLD, 90));
-            is.setOffsetX(4.0f);
-            is.setOffsetY(4.0f);
             text.setFill(Color.PURPLE);
-            text.setEffect(is);
+            functions.setshadowstyling(text);
             text.setText("X");
         }
 
@@ -373,10 +346,8 @@ public class Main extends Application {
         private void drawO() {
             InnerShadow is = new InnerShadow();
             text.setFont(Font.font(null, FontWeight.BOLD, 100));
-            is.setOffsetX(4.0f);
-            is.setOffsetY(4.0f);
             text.setFill(Color.CYAN);
-            text.setEffect(is);
+            functions.setshadowstyling(text);
             text.setText("O");
         }
 
